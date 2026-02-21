@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audiobook Builder — Convert Audio to M4B Audiobooks</title>
+  <meta name="description" content="Convert audio files into chapter-enabled M4B audiobooks. A native macOS app built with Swift and SwiftUI.">
+  <link rel="icon" type="image/png" href="images/icon.png">
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --blue-dark: #0d1f3c;
+      --blue-mid: #1a3a6c;
+      --blue-light: #264d8a;
+      --gold: #d4a843;
+      --gold-light: #e8c46e;
+      --white: #ffffff;
+      --white-dim: rgba(255, 255, 255, 0.7);
+      --white-faint: rgba(255, 255, 255, 0.08);
+      --white-border: rgba(255, 255, 255, 0.12);
+      --radius: 16px;
+      --radius-sm: 10px;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      background: linear-gradient(180deg, var(--blue-mid) 0%, var(--blue-dark) 100%);
+      color: var(--white);
+      line-height: 1.6;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ---- Fade-in animation ---- */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ---- Hero ---- */
+    .hero {
+      text-align: center;
+      padding: 100px 0 80px;
+    }
+
+    .hero-icon {
+      width: 160px;
+      height: 160px;
+      border-radius: 36px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+      margin-bottom: 32px;
+    }
+
+    .hero h1 {
+      font-size: 48px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 12px;
+    }
+
+    .hero .tagline {
+      font-size: 20px;
+      color: var(--white-dim);
+      max-width: 480px;
+      margin: 0 auto 36px;
+    }
+
+    .btn-download {
+      display: inline-block;
+      background: var(--gold);
+      color: var(--blue-dark);
+      font-size: 17px;
+      font-weight: 600;
+      padding: 14px 36px;
+      border-radius: 980px;
+      text-decoration: none;
+      transition: background 0.2s ease, transform 0.15s ease;
+    }
+    .btn-download:hover {
+      background: var(--gold-light);
+      transform: scale(1.04);
+    }
+    .btn-download:active {
+      transform: scale(0.98);
+    }
+
+    .hero .badge {
+      display: inline-block;
+      margin-top: 20px;
+      font-size: 13px;
+      color: var(--white-dim);
+      background: var(--white-faint);
+      padding: 6px 14px;
+      border-radius: 980px;
+      border: 1px solid var(--white-border);
+    }
+
+    /* ---- Section titles ---- */
+    .section-title {
+      text-align: center;
+      font-size: 36px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      margin-bottom: 48px;
+    }
+
+    /* ---- Features ---- */
+    .features {
+      padding: 60px 0 80px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .feature-card {
+      background: var(--white-faint);
+      border: 1px solid var(--white-border);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+    .feature-card:hover {
+      transform: translateY(-4px);
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .feature-icon {
+      font-size: 32px;
+      margin-bottom: 14px;
+      display: block;
+    }
+
+    .feature-card h3 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .feature-card p {
+      font-size: 14px;
+      color: var(--white-dim);
+      line-height: 1.55;
+    }
+
+    /* ---- How it works ---- */
+    .how-it-works {
+      padding: 60px 0 80px;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+      text-align: center;
+    }
+
+    .step-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--gold);
+      color: var(--blue-dark);
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+
+    .step h3 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .step p {
+      font-size: 15px;
+      color: var(--white-dim);
+      max-width: 280px;
+      margin: 0 auto;
+    }
+
+    /* ---- Footer ---- */
+    footer {
+      border-top: 1px solid var(--white-border);
+      padding: 32px 0;
+      text-align: center;
+      font-size: 14px;
+      color: var(--white-dim);
+    }
+
+    footer a {
+      color: var(--gold);
+      text-decoration: none;
+    }
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    footer .footer-inner {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    footer .sep {
+      opacity: 0.4;
+    }
+
+    /* ---- Responsive ---- */
+    @media (max-width: 768px) {
+      .hero {
+        padding: 72px 0 56px;
+      }
+      .hero-icon {
+        width: 120px;
+        height: 120px;
+        border-radius: 28px;
+      }
+      .hero h1 {
+        font-size: 32px;
+      }
+      .hero .tagline {
+        font-size: 17px;
+      }
+      .section-title {
+        font-size: 28px;
+        margin-bottom: 32px;
+      }
+      .features-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+      .steps {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container">
+      <img src="images/icon.png" alt="Audiobook Builder app icon" class="hero-icon" width="160" height="160">
+      <h1>Audiobook Builder</h1>
+      <p class="tagline">Convert audio files into chapter-enabled M4B audiobooks</p>
+      <a href="https://github.com/dattran2346/audiobook-builder/releases/latest" class="btn-download">Download</a>
+      <br>
+      <span class="badge">Requires macOS 14 Sonoma or later</span>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features">
+    <div class="container">
+      <h2 class="section-title fade-in">Features</h2>
+      <div class="features-grid">
+        <div class="feature-card fade-in">
+          <span class="feature-icon" aria-hidden="true">🎵</span>
+          <h3>9 Audio Formats</h3>
+          <p>Import MP3, FLAC, WAV, OGG, AAC, OPUS, WMA, MP4, and M4A files.</p>
+        </div>
+        <div class="feature-card fade-in">
+          <span class="feature-icon" aria-hidden="true">📑</span>
+          <h3>Chapter Editing</h3>
+          <p>Custom chapter titles with drag-and-drop reordering to organize your audiobook.</p>
+        </div>
+        <div class="feature-card fade-in">
+          <span class="feature-icon" aria-hidden="true">🖼️</span>
+          <h3>Cover Art</h3>
+          <p>Embed JPEG or PNG cover images directly into your audiobook.</p>
+        </div>
+        <div class="feature-card fade-in">
+          <span class="feature-icon" aria-hidden="true">📖</span>
+          <h3>M4B Export</h3>
+          <p>Export chaptered audiobooks compatible with Apple Books and iTunes.</p>
+        </div>
+        <div class="feature-card fade-in">
+          <span class="feature-icon" aria-hidden="true">🏷️</span>
+          <h3>Metadata</h3>
+          <p>Set title and author, or let them be auto-extracted from audio file tags.</p>
+        </div>
+        <div class="feature-card fade-in">
+          <span class="feature-icon" aria-hidden="true">💻</span>
+          <h3>Native macOS</h3>
+          <p>Built with Swift and SwiftUI. Lightweight universal binary for Apple Silicon and Intel.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="how-it-works">
+    <div class="container">
+      <h2 class="section-title fade-in">How It Works</h2>
+      <div class="steps">
+        <div class="step fade-in">
+          <div class="step-number">1</div>
+          <h3>Import</h3>
+          <p>Drag and drop your audio files or use the file picker to add them.</p>
+        </div>
+        <div class="step fade-in">
+          <div class="step-number">2</div>
+          <h3>Organize</h3>
+          <p>Reorder chapters, edit titles, add cover art, and set metadata.</p>
+        </div>
+        <div class="step fade-in">
+          <div class="step-number">3</div>
+          <h3>Export</h3>
+          <p>Build your M4B audiobook with one click, ready for Apple Books.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-inner">
+        <span>Built by Apollo Audio</span>
+        <span class="sep">&middot;</span>
+        <a href="https://github.com/dattran2346/audiobook-builder">GitHub</a>
+        <span class="sep">&middot;</span>
+        <span>&copy; 2026</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scroll fade-in observer -->
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+  </script>
+
+</body>
+</html>
