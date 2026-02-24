@@ -279,9 +279,24 @@
       <img src="images/icon.png" alt="Audiobook Builder app icon" class="hero-icon" width="160" height="160">
       <h1>Audiobook Builder</h1>
       <p class="tagline">Convert audio files into chapter-enabled M4B audiobooks</p>
-      <a href="https://github.com/Apollo-Audio/audiobook-builder-web/releases/latest" class="btn-download">Download</a>
+      <a id="download-btn" href="https://github.com/Apollo-Audio/audiobook-builder-web/releases/latest" class="btn-download">Download</a>
       <br>
       <span class="badge">Requires macOS 12 Monterey or later</span>
+      <script>
+        (function() {
+          var base = 'https://github.com/Apollo-Audio/audiobook-builder-web/releases/download/latest/Audiobook.Builder.';
+          var btn = document.getElementById('download-btn');
+          if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
+            navigator.userAgentData.getHighEntropyValues(['architecture']).then(function(ua) {
+              btn.href = base + (ua.architecture === 'arm' ? 'arm64' : 'x86_64') + '.dmg';
+            });
+          } else {
+            // Safari/Firefox don't expose architecture; default to arm64 since
+            // all Macs sold since late 2020 are Apple Silicon.
+            btn.href = base + 'arm64.dmg';
+          }
+        })();
+      </script>
     </div>
   </section>
 
